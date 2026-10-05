@@ -1,0 +1,22 @@
+{
+  "name": "GlowUp \u2014 Beauty, Movement & Study",
+  "short_name": "GlowUp",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fff8fb",
+  "theme_color": "#f4a7c7",
+  "description": "A simple daily glow-up planner for beauty, movement and study.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "lifestyle",
+    "health",
+    "education"
+  ]
+}

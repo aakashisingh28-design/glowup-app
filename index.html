@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f4a7c7">
+  <meta name="description" content="GlowUp — your daily beauty, movement and study reset.">
+  <link rel="manifest" href="manifest.json">
+  <title>GlowUp ✨</title>
+  <style>
+    :root{--pink:#f4a7c7;--pink2:#fde7f0;--ink:#30252b;--muted:#776a72;--card:#fff;--bg:#fff8fb;--line:#f1d9e3}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--ink)}
+    .app{max-width:760px;margin:auto;padding:24px 18px 90px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    h1{font-size:32px;margin:0}.sub{color:var(--muted);margin-top:4px}.pill{border:1px solid var(--line);background:white;border-radius:999px;padding:9px 12px}
+    .hero{background:linear-gradient(135deg,#fff,#fde7f0);border:1px solid var(--line);border-radius:24px;padding:22px;margin-bottom:16px}
+    .hero h2{margin:0 0 6px;font-size:22px}.progress{height:10px;background:#f4dfe7;border-radius:99px;overflow:hidden;margin-top:14px}.bar{height:100%;background:var(--pink);width:0%;transition:.25s}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px}
+    .card h3{margin:0 0 10px;font-size:16px}.task{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid #f7e8ee}
+    .task:first-of-type{border-top:0}.task input{accent-color:var(--pink);width:18px;height:18px}.task label{font-size:14px;line-height:1.3}
+    .done{text-decoration:line-through;color:#a2969d}.section{margin-top:16px}.section h2{font-size:18px;margin:0 0 10px}
+    button{border:0;background:var(--pink);color:white;font-weight:700;border-radius:13px;padding:11px 14px;cursor:pointer}.secondary{background:white;color:var(--ink);border:1px solid var(--line)}
+    .timer{text-align:center}.time{font-size:42px;font-weight:800;margin:8px}.actions{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+    .footer{text-align:center;color:var(--muted);font-size:12px;margin-top:28px}
+    @media(max-width:560px){.grid{grid-template-columns:1fr}.app{padding-top:18px}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <div class="top">
+    <div><h1>GlowUp ✨</h1><div class="sub" id="date"></div></div>
+    <button class="pill secondary" id="reset">Reset</button>
+  </div>
+
+  <section class="hero">
+    <h2>Today's glow-up</h2>
+    <div class="sub"><span id="count">0</span>/<span id="total">0</span> completed</div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+  </section>
+
+  <section class="grid">
+    <div class="card"><h3>💗 Beauty</h3>
+      <div class="task"><input type="checkbox" data-task="am"><label>AM skincare + SPF</label></div>
+      <div class="task"><input type="checkbox" data-task="body"><label>Body-care routine</label></div>
+      <div class="task"><input type="checkbox" data-task="hair"><label>Hair-care task</label></div>
+      <div class="task"><input type="checkbox" data-task="pm"><label>PM skincare</label></div>
+    </div>
+    <div class="card"><h3>🏃 Movement</h3>
+      <div class="task"><input type="checkbox" data-task="walk"><label>Walk / movement</label></div>
+      <div class="task"><input type="checkbox" data-task="workout"><label>10–30 min workout</label></div>
+      <div class="task"><input type="checkbox" data-task="water"><label>Drink enough water</label></div>
+    </div>
+    <div class="card"><h3>📚 Study</h3>
+      <div class="task"><input type="checkbox" data-task="study1"><label>Focus session #1</label></div>
+      <div class="task"><input type="checkbox" data-task="study2"><label>Focus session #2</label></div>
+      <div class="task"><input type="checkbox" data-task="review"><label>Quick revision</label></div>
+    </div>
+    <div class="card timer"><h3>⏱ Focus timer</h3>
+      <div class="time" id="time">25:00</div>
+      <div class="actions"><button id="start">Start</button><button class="secondary" id="pause">Pause</button><button class="secondary" id="restart">Restart</button></div>
+    </div>
+  </section>
+
+  <section class="section card">
+    <h2>🔥 Your streak</h2>
+    <p class="sub">Finish every task today to build your streak.</p>
+    <strong id="streak">0 days</strong>
+  </section>
+  <div class="footer">GlowUp v0.1 • Your data stays in this browser.</div>
+</main>
+<script>
+const today=new Date().toISOString().slice(0,10);
+document.getElementById('date').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+const key='glowup-'+today, streakKey='glowup-streak';
+const boxes=[...document.querySelectorAll('[data-task]')];
+const saved=JSON.parse(localStorage.getItem(key)||'{}');
+boxes.forEach(b=>{b.checked=!!saved[b.dataset.task]; b.addEventListener('change',save)});
+function save(){const state={};boxes.forEach(b=>state[b.dataset.task]=b.checked);localStorage.setItem(key,JSON.stringify(state));update()}
+function update(){
+  const done=boxes.filter(b=>b.checked).length;
+  document.getElementById('count').textContent=done; document.getElementById('total').textContent=boxes.length;
+  document.getElementById('bar').style.width=(done/boxes.length*100)+'%';
+  boxes.forEach(b=>b.nextElementSibling.classList.toggle('done',b.checked));
+  let s=Number(localStorage.getItem(streakKey)||0);
+  const last=localStorage.getItem('glowup-last-complete');
+  if(done===boxes.length && last!==today){s++;localStorage.setItem(streakKey,s);localStorage.setItem('glowup-last-complete',today)}
+  document.getElementById('streak').textContent=s+' day'+(s===1?'':'s');
+}
+document.getElementById('reset').onclick=()=>{if(confirm('Reset today?')){localStorage.removeItem(key);location.reload()}};
+let seconds=1500, interval=null;
+function render(){document.getElementById('time').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0')}
+document.getElementById('start').onclick=()=>{if(interval)return;interval=setInterval(()=>{if(seconds>0){seconds--;render()}else{clearInterval(interval);interval=null}},1000)};
+document.getElementById('pause').onclick=()=>{clearInterval(interval);interval=null};
+document.getElementById('restart').onclick=()=>{clearInterval(interval);interval=null;seconds=1500;render()};
+render();update();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body></html>
